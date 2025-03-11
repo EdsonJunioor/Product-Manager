@@ -4,3 +4,6 @@
 
 /.vs
 /API/ProductManagerAPI/.vs
+/API/ProductManagerAPI/ProductManagerAPI/obj/Release/net8.0
+/API/ProductManagerAPI/ProductManagerAPI/obj/Debug/net8.0/ProductManagerAPI.AssemblyInfo.cs
+/API/ProductManagerAPI/ProductManagerAPI/obj/Debug/net8.0/ProductManagerAPI.AssemblyInfoInputs.cache

@@ -1,0 +1,53 @@
+<mat-card class="category-card">
+    <mat-toolbar color="primary">Gerenciamento de Categorias</mat-toolbar>
+  
+    <mat-tab-group #tabGroup>
+      <mat-tab label="Listagem">
+        <div class="list-container">
+          <mat-list role="list">
+            <mat-list-item role="listitem" *ngFor="let category of categories" class="list-item">
+                <div class="actions">
+                    <span class="category-name">{{ category.name }}</span>
+                    <div>
+                        <button mat-icon-button color="primary" (click)="onEdit(category, tabGroup)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="onDelete(category.id)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </mat-tab>
+  
+      <mat-tab label="Cadastro">
+        <form (ngSubmit)="onSubmit()" #categoryForm="ngForm" class="form-container">
+          <mat-form-field class="full-width">
+            <mat-label>Nome da Categoria</mat-label>
+            <input
+              matInput
+              type="text"
+              [(ngModel)]="category.name"
+              name="name"
+              required
+            />
+          </mat-form-field>
+  
+          <div class="button-group">
+            <button mat-raised-button color="primary" type="submit" [disabled]="categoryForm.invalid">
+              {{ category.id ? 'Atualizar' : 'Salvar' }}
+            </button>
+            <button mat-raised-button color="warn" type="button" (click)="onDelete(category.id)" *ngIf="category.id">
+              Deletar
+            </button>
+            <button mat-raised-button color="accent" type="button" (click)="onCancel(tabGroup)">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+  

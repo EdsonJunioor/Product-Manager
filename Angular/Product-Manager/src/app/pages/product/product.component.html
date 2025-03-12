@@ -1,0 +1,73 @@
+<mat-card class="product-card">
+    <mat-toolbar color="primary">Gerenciamento de Produtos</mat-toolbar>
+  
+    <mat-tab-group #tabGroup>
+      <mat-tab label="Listagem">
+        <div class="list-container">
+          <mat-list role="list">
+            <mat-list-item role="listitem" *ngFor="let product of products" class="list-item">
+                <div class="actions">
+                    <span class="product-name">{{ product.name }}</span>
+                    <div>
+                        <button mat-icon-button color="primary" (click)="onEdit(product, tabGroup)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="onDelete(product.id)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </mat-list-item>
+          </mat-list>
+        </div>
+      </mat-tab>
+  
+      <mat-tab label="Cadastro">
+        <form (ngSubmit)="onSubmit()" #productForm="ngForm" class="form-container">
+          <mat-form-field class="full-width">
+            <mat-label>Nome do Produto</mat-label>
+            <input matInput [(ngModel)]="product.name" name="name" required />
+          </mat-form-field>
+  
+          <mat-form-field class="full-width">
+            <mat-label>Categoria</mat-label>
+            <mat-select [(ngModel)]="product.categoryId" name="categoryId" required>
+              <mat-option *ngFor="let category of categories" [value]="category.id">
+                {{ category.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+  
+          <mat-form-field class="full-width">
+            <mat-label>Preço</mat-label>
+            <input matInput type="number" [(ngModel)]="product.price" name="price" required />
+          </mat-form-field>
+  
+          <mat-form-field class="full-width">
+            <mat-label>Data de Validade</mat-label>
+            <input matInput type="date" [(ngModel)]="product.expirationDate" name="expirationDate" required />
+          </mat-form-field>
+  
+          <mat-form-field class="full-width">
+            <mat-label>Lote</mat-label>
+            <input matInput [(ngModel)]="product.batch" name="batch" required />
+          </mat-form-field>
+  
+          <mat-form-field class="full-width">
+            <mat-label>Quantidade em Estoque</mat-label>
+            <input matInput type="number" [(ngModel)]="product.stockQuantity" name="stockQuantity" required />
+          </mat-form-field>
+  
+          <div class="button-group">
+            <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid">
+              {{ product.id ? 'Atualizar' : 'Salvar' }}
+            </button>
+            <button mat-raised-button color="accent" type="button" *ngIf="product.id" (click)="onCancel(tabGroup)">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </mat-tab>
+    </mat-tab-group>
+</mat-card>
+  

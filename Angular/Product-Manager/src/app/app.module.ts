@@ -13,19 +13,21 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { MatSelectModule } from '@angular/material/select';
 import { provideHttpClient   } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CategoryComponent } from './pages/category/category.component';
 import { ProductComponent } from './pages/product/product.component';
+import { ProductDetailsModalComponent } from './modals/product-details-modal/product-details-modal.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     CategoryComponent,
-    ProductComponent
+    ProductComponent,
+    ProductDetailsModalComponent
   ],
   imports: [
     BrowserModule,
@@ -40,7 +42,8 @@ import { ProductComponent } from './pages/product/product.component';
     MatListModule,
     MatIconModule,
     MatSelectModule,
-    MatProgressSpinnerModule 
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   providers: [
     provideAnimationsAsync(),

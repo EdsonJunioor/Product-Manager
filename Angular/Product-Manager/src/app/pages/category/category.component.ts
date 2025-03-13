@@ -84,6 +84,7 @@ export class CategoryComponent {
     this.categoryService.updateCategory(id, this.selectedCategory).subscribe({
       next: () => {
         this.loadCategories();
+        this.category = { id: '', name: '' };  
         this.showMessage('Categoria atualizada com sucesso!');
         this.isSaving = false;
       },
@@ -112,7 +113,7 @@ export class CategoryComponent {
 
   showMessage(message: string, isError: boolean = false) {
     this.snackBar.open(message, 'Fechar', {
-      duration: 3000,
+      duration: 10000,
       panelClass: isError ? 'error-snackbar' : 'success-snackbar'
     });
   }

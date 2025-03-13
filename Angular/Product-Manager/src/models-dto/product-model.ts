@@ -7,4 +7,5 @@ export interface ProductModel {
     batch: string;
     stockQuantity?: number;
     isDeleted?: boolean;
+    category: string;
 }

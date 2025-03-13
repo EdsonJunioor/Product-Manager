@@ -11,6 +11,9 @@ import { MatIconModule } from '@angular/material/icon'
 import { FormsModule } from '@angular/forms';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatSelectModule } from '@angular/material/select';
+import { provideHttpClient   } from '@angular/common/http';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -37,9 +40,11 @@ import { ProductComponent } from './pages/product/product.component';
     MatListModule,
     MatIconModule,
     MatSelectModule,
+    MatProgressSpinnerModule 
   ],
   providers: [
-    provideAnimationsAsync()
+    provideAnimationsAsync(),
+    provideHttpClient()
   ],
   bootstrap: [AppComponent]
 })

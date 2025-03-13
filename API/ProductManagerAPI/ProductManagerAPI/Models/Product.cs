@@ -19,7 +19,7 @@ namespace ProductManagerAPI.Models
         public decimal Price { get; set; }
 
         [BsonElement("ExpirationDate")]
-        public DateTime ExpirationDate { get; set; }
+        public string ExpirationDate { get; set; }
 
         [BsonElement("Batch")]
         public string Batch { get; set; }

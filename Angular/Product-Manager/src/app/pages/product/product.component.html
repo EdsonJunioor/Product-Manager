@@ -8,17 +8,30 @@
             <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
           </div>
           <mat-list role="list">
-            <mat-list-item role="listitem" *ngFor="let product of products" class="list-item">
+
+            <mat-form-field class="full-width">
+              <mat-label>Categoria</mat-label>
+              <mat-select [(ngModel)]="filter" name="categoryFilter" (selectionChange)="filterByCategory()" required>
+                <mat-option *ngFor="let category of categories" [value]="category.id">
+                  {{ category.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-list-item role="listitem" *ngFor="let product of filteredProducts" class="list-item">
                 <div class="actions">
-                    <span class="product-name">{{ product?.name }}</span>
-                    <div>
-                        <button mat-icon-button color="primary" (click)="onEdit(product, tabGroup)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" (click)="deleteProduct(product.id)">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
+                  <span class="product-name">{{ product?.name }}</span>
+                  <div>
+                    <button mat-icon-button color="accent" (click)="openProductDetails(product)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button color="primary" (click)="onEdit(product, tabGroup)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteProduct(product.id)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
                 </div>
             </mat-list-item>
           </mat-list>

@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
+import { CategoryModel } from '../../../models-dto/category-model';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ProductDetailsModalComponent } from '../../modals/product-details-modal/product-details-modal.component';
+
 import { ProductService } from '../../services/product.service';
 import { CategoryService } from '../../services/category.service';
 import { ProductModel } from '../../../models-dto/product-model';
-import { CategoryModel } from '../../../models-dto/category-model';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-product',
@@ -12,15 +15,37 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class ProductComponent {
 
-  constructor(private productService: ProductService, private categoryService: CategoryService, private snackBar: MatSnackBar) {}
+  constructor(private productService: ProductService, 
+    private categoryService: CategoryService, 
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
+  ) {}
 
   products: ProductModel[] = [];
   selectedProduct?: ProductModel;
-  product: ProductModel = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
+  product: ProductModel = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0, category: ''};
   categories: CategoryModel[] = [];
+  filter: string = '';
+  filteredProducts: ProductModel[] = [];
   isLoading = false;
   isSaving = false;
   
+  openProductDetails(product: ProductModel): void {
+    
+    const category = this.categories.find(a => a.id === product.categoryId);
+
+    let productData: ProductModel = { 
+      ...product, 
+      category: category?.name || 'Categoria Desconhecida'
+    };
+    
+    this.dialog.open(ProductDetailsModalComponent, {
+      width: '400px',
+      data: productData,
+      
+    });
+  }
+
   async ngOnInit(): Promise<void> {
     await this.loadProducts();
     await this.loadCategories();
@@ -32,6 +57,7 @@ export class ProductComponent {
     this.productService.getAllProducts().subscribe({
       next: (data) => {
         this.products = data;
+        this.filteredProducts = data;
         this.isLoading = false;
       },
       error: (error) => {
@@ -39,6 +65,7 @@ export class ProductComponent {
         this.showMessage('Não foi possível carregar os produtos.', true); 
       }
     });
+
   }
 
   async loadCategories(): Promise<void> {
@@ -68,7 +95,7 @@ export class ProductComponent {
       next: (product) => {
         this.loadProducts();
         this.showMessage('Produto criado com sucesso!');
-        this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
+        this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0, category: ''};
         this.isSaving = false;
       },
       error: (error) => {
@@ -76,6 +103,14 @@ export class ProductComponent {
         this.isSaving = false;
       }
     });
+  }
+
+  filterByCategory(): void {
+    if (this.filter) {
+      this.filteredProducts = this.products.filter(product => product.categoryId === this.filter);
+    } else {
+      this.filteredProducts = this.products;
+    }
   }
 
   async getProductByCategoryId(id: string): Promise<void> {
@@ -94,7 +129,7 @@ export class ProductComponent {
         this.loadProducts();
         this.showMessage('Produto atualizado com sucesso!');
         this.isSaving = false;
-        this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
+        this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0, category: ''};
       },
       error: (error) => {
         this.showMessage('Erro ao atualizar produto.', true);
@@ -127,7 +162,7 @@ export class ProductComponent {
   }
 
   onCancel(tabGroup: any) {
-    this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
+    this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0, category: '' };
     tabGroup.selectedIndex = 0;  
   }
 

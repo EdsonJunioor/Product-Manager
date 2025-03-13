@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>Detalhes do Produto</h2>
+<mat-dialog-content>
+  <p><strong>Nome:</strong> {{ productData.name }}</p>
+  <p><strong>Categoria:</strong> {{ productData.category }}</p>
+  <p><strong>Preço:</strong> R$ {{ productData.price }}</p>
+  <p><strong>Data de Validade:</strong> {{ productData.expirationDate | date }}</p>
+  <p><strong>Lote:</strong> {{ productData.batch }}</p>
+  <p><strong>Quantidade em Estoque:</strong> {{ productData.stockQuantity || 'N/A' }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Fechar</button>
+</mat-dialog-actions>

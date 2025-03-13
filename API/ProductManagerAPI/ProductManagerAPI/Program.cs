@@ -1,4 +1,5 @@
 using ProductManagerAPI.DbContextConfig;
+using ProductManagerAPI.DbService;
 using ProductManagerAPI.Interfaces;
 using ProductManagerAPI.Repositories;
 
@@ -6,6 +7,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add MongoDB Context with EF Core
 builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddSingleton<MongoDBService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 
 // Add services to the container.
@@ -20,6 +32,9 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
+app.MapGet("/", () => "API com MongoDB Atlas está rodando!");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

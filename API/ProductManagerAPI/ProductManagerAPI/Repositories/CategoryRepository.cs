@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
-using ProductManagerAPI.DbContextConfig;
+using MongoDB.Driver;
+using ProductManagerAPI.DbService;
+using ProductManagerAPI.Dto;
 using ProductManagerAPI.Interfaces;
 using ProductManagerAPI.Models;
 
@@ -8,23 +10,34 @@ namespace ProductManagerAPI.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private readonly AppDbContext _context;
+        private readonly MongoDBService _mongoDBService;
 
-        public CategoryRepository(AppDbContext context)
+        public CategoryRepository(MongoDBService mongoDBService)
         {
-            _context = context;
+            _mongoDBService = mongoDBService;
         }
 
         public async Task<Category> CreateAsync(Category category)
         {
-            await _context.Categories.AddAsync(category);
-            await _context.SaveChangesAsync();
+            var categoriesCollection = await _mongoDBService.GetCategoriesCollectionAsync();
+            await categoriesCollection.InsertOneAsync(category);
+
             return category;
         }
 
-        public async Task<List<Category>> GetAllAsync()
+        public async Task<List<CategoryDto>> GetAllAsync()
         {
-            return await _context.Categories.Where(a => !a.IsDeleted).ToListAsync();
+            var categoriesCollection = await _mongoDBService.GetCategoriesCollectionAsync();
+            var categories = await categoriesCollection.Find(x => !x.IsDeleted).ToListAsync();
+
+            var categoryList = categories.Select(product => new CategoryDto
+            {
+                Id = product.Id.ToString(),
+                Name = product.Name,
+                IsDeleted = product.IsDeleted
+            }).ToList();
+
+            return categoryList;
         }
 
         public async Task<Category?> GetByIdAsync(string id)
@@ -33,37 +46,56 @@ namespace ProductManagerAPI.Repositories
             {
                 return null;
             }
+            var categoriesCollection = await _mongoDBService.GetCategoriesCollectionAsync();
+            var category = await categoriesCollection.Find(x => x.Id == objectId).FirstOrDefaultAsync();
 
-            return await _context.Categories.FindAsync(objectId);
+            return category;
         }
 
         public async Task<bool> UpdateAsync(string id, Category category)
         {
-            var existent = await GetByIdAsync(id);
-            if (existent == null) return false;
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+                return false;
 
-            existent.Name = category.Name;
-            await _context.SaveChangesAsync();
+            var productsCollection = await _mongoDBService.GetCategoriesCollectionAsync();
+
+            var updateDefinition = Builders<Category>.Update
+                .Set(p => p.Name, category.Name);
+
+            var updateResult = await productsCollection.UpdateOneAsync(
+                p => p.Id == objectId,
+                updateDefinition
+            );
+
             return true;
         }
 
         public async Task<bool> SoftDeleteAsync(string id)
         {
-            var existent = await GetByIdAsync(id);
-            if (existent == null) return false;
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+                return false;
 
-            existent.IsDeleted = true;
-            await _context.SaveChangesAsync();
+            var productsCollection = await _mongoDBService.GetCategoriesCollectionAsync();
+
+            var updateDefinition = Builders<Category>.Update
+                .Set(p => p.IsDeleted, true);
+
+            var updateResult = await productsCollection.UpdateOneAsync(
+                p => p.Id == objectId,
+                updateDefinition
+            );
+
             return true;
         }
 
         public async Task<bool> DeleteAsync(string id)
         {
-            var category = await GetByIdAsync(id);
-            if (category == null) return false;
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+                return false;
 
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
+            var productsCollection = await _mongoDBService.GetCategoriesCollectionAsync();
+            var result = await productsCollection.DeleteOneAsync(p => p.Id == objectId);
+
             return true;
         }
     }

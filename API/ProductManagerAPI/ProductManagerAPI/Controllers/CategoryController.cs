@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using ProductManagerAPI.DbContextConfig;
+using ProductManagerAPI.Dto;
 using ProductManagerAPI.Interfaces;
 using ProductManagerAPI.Models;
 
@@ -18,8 +19,8 @@ namespace ProductManagerAPI.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Category>> Create(Category category)
+        [HttpPost("create")]
+        public async Task<ActionResult<Category>> Create([FromBody] Category category)
         {
             var createdCategory = await _categoryRepository.CreateAsync(category);
             return CreatedAtAction(nameof(Create), new { id = createdCategory.Id }, createdCategory);
@@ -27,34 +28,34 @@ namespace ProductManagerAPI.Controllers
         }
 
         [HttpGet("getAll")]
-        public async Task<ActionResult<List<Category>>> GetAll()
+        public async Task<ActionResult<List<CategoryDto>>> GetAll()
         {
             var categories = await _categoryRepository.GetAllAsync();
             return Ok(categories);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Category>> Get(string id)
         {
             var category = await _categoryRepository.GetByIdAsync(id);
             return category == null ? NotFound() : Ok(category);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update(string id, Category category)
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody]Category category)
         {
             var updated = await _categoryRepository.UpdateAsync(id, category);
             return updated ? NoContent() : NotFound();
         }
 
-        [HttpPost("delete")]
+        [HttpPut("delete/{id}")]
         public async Task<IActionResult> SoftDelete(string id)
         {
             var deleted = await _categoryRepository.SoftDeleteAsync(id);
             return deleted ? NoContent() : NotFound();
         }
 
-        [HttpDelete]
+        [HttpDelete("deleteDefinitely/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var deleted = await _categoryRepository.DeleteAsync(id);

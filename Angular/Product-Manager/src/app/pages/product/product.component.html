@@ -4,15 +4,18 @@
     <mat-tab-group #tabGroup>
       <mat-tab label="Listagem">
         <div class="list-container">
+          <div *ngIf="isLoading" class="loading-container">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
           <mat-list role="list">
             <mat-list-item role="listitem" *ngFor="let product of products" class="list-item">
                 <div class="actions">
-                    <span class="product-name">{{ product.name }}</span>
+                    <span class="product-name">{{ product?.name }}</span>
                     <div>
                         <button mat-icon-button color="primary" (click)="onEdit(product, tabGroup)">
                             <mat-icon>edit</mat-icon>
                         </button>
-                        <button mat-icon-button color="warn" (click)="onDelete(product.id)">
+                        <button mat-icon-button color="warn" (click)="deleteProduct(product.id)">
                             <mat-icon>delete</mat-icon>
                         </button>
                     </div>
@@ -50,16 +53,17 @@
   
           <mat-form-field class="full-width">
             <mat-label>Lote</mat-label>
-            <input matInput [(ngModel)]="product.batch" name="batch" required />
+            <input matInput [(ngModel)]="product.batch" name="batch" />
           </mat-form-field>
   
           <mat-form-field class="full-width">
             <mat-label>Quantidade em Estoque</mat-label>
-            <input matInput type="number" [(ngModel)]="product.stockQuantity" name="stockQuantity" required />
+            <input matInput type="number" [(ngModel)]="product.stockQuantity" name="stockQuantity" />
           </mat-form-field>
   
           <div class="button-group">
-            <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid">
+            <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid || isSaving">
+              <mat-progress-spinner *ngIf="isSaving" diameter="20" mode="indeterminate"></mat-progress-spinner>
               {{ product.id ? 'Atualizar' : 'Salvar' }}
             </button>
             <button mat-raised-button color="accent" type="button" *ngIf="product.id" (click)="onCancel(tabGroup)">

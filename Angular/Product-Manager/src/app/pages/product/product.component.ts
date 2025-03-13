@@ -1,4 +1,9 @@
 import { Component } from '@angular/core';
+import { ProductService } from '../../services/product.service';
+import { CategoryService } from '../../services/category.service';
+import { ProductModel } from '../../../models-dto/product-model';
+import { CategoryModel } from '../../../models-dto/category-model';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-product',
@@ -7,51 +12,130 @@ import { Component } from '@angular/core';
 })
 export class ProductComponent {
 
-  product = { id: 0, name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
-  categories = [
-    { id: 1, name: 'Eletrônicos' },
-    { id: 2, name: 'Roupas' },
-    { id: 3, name: 'Alimentos' }
-  ]; 
+  constructor(private productService: ProductService, private categoryService: CategoryService, private snackBar: MatSnackBar) {}
 
-  products = [
-    { id: 1, name: 'Smartphone', categoryId: '1', price: 1999, expirationDate: '2025-12-31', batch: 'A123', stockQuantity: 50 },
-    { id: 2, name: 'Camiseta', categoryId: '2', price: 49.99, expirationDate: '2026-01-01', batch: 'B234', stockQuantity: 100 }
-  ];
+  products: ProductModel[] = [];
+  selectedProduct?: ProductModel;
+  product: ProductModel = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
+  categories: CategoryModel[] = [];
+  isLoading = false;
+  isSaving = false;
+  
+  async ngOnInit(): Promise<void> {
+    await this.loadProducts();
+    await this.loadCategories();
+  }
 
-  onEdit(product: any, tabGroup: any) {
-    this.product = { ...product };  
+  async loadProducts(): Promise<void> {
+    this.isLoading = true;
+
+    this.productService.getAllProducts().subscribe({
+      next: (data) => {
+        this.products = data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.showMessage('Não foi possível carregar os produtos.', true); 
+      }
+    });
+  }
+
+  async loadCategories(): Promise<void> {
+    this.isLoading = true;
+
+    this.categoryService.getAllCategories().subscribe({
+      next: (data) => {
+        this.categories = data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.showMessage('Não foi possível carregar produtos.', true);  
+      }
+    });
+  }
+
+  async createProduct(): Promise<void> {
+
+    if (this.selectedProduct){
+      await this.updateProduct(this.selectedProduct.id);
+      return;
+    }
+
+    this.isSaving = true;
+    this.productService.createProduct(this.product).subscribe({
+      next: (product) => {
+        this.loadProducts();
+        this.showMessage('Produto criado com sucesso!');
+        this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
+        this.isSaving = false;
+      },
+      error: (error) => {
+        this.showMessage('Ocorreu um erro ao criar o produto.', true);
+        this.isSaving = false;
+      }
+    });
+  }
+
+  async getProductByCategoryId(id: string): Promise<void> {
+    this.productService.getProductsByCategory(id).subscribe({
+      next: (product) => this.products = product
+    });
+  }
+
+  async updateProduct(id: string): Promise<void> {
+    if (!this.selectedProduct) return;
+
+    this.isSaving = true;
+
+    this.productService.updateProduct(id, this.selectedProduct).subscribe({
+      next: () => {
+        this.loadProducts();
+        this.showMessage('Produto atualizado com sucesso!');
+        this.isSaving = false;
+        this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
+      },
+      error: (error) => {
+        this.showMessage('Erro ao atualizar produto.', true);
+        this.isSaving = false;
+      }
+    });
+  }
+
+  async deleteProduct(id: string): Promise<void> {
+    this.productService.softDeleteProduct(id).subscribe({
+      next: () => {
+        this.loadProducts();
+      },
+      error: (error) => {
+        this.showMessage('Erro ao excluir produto.', true);
+      }
+    });
+  }
+
+  onEdit(product: ProductModel, tabGroup: any) {
+    this.selectedProduct = { ...product };
+    this.product = this.selectedProduct;
     tabGroup.selectedIndex = 1;
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.product.name.trim()) {
-
-      if (this.product.id) {
-        const index = this.products.findIndex(p => p.id === this.product.id);
-        if (index !== -1) {
-          this.products[index] = { ...this.product };
-        }
-        
-      } else {
-        this.product.id = this.products.length ? Math.max(...this.products.map(p => p.id)) + 1 : 1;
-        this.products.push({ ...this.product });
-      }
-
-      this.product = { id: 0, name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
-    }
-  }
-
-  onDelete(id: number) {
-    this.products = this.products.filter(p => p.id !== id);
-    if (this.product.id === id) {
-      this.product = { id: 0, name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 }; // Limpa o formulário se o produto deletado estava em edição
+      await this.createProduct();
     }
   }
 
   onCancel(tabGroup: any) {
-    this.product = { id: 0, name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };  // Limpa o formulário
+    this.product = { id: '', name: '', categoryId: '', price: 0, expirationDate: '', batch: '', stockQuantity: 0 };
     tabGroup.selectedIndex = 0;  
+  }
+
+  showMessage(message: string, isError: boolean = false) {
+    this.snackBar.open(message, 'Fechar', {
+      duration: 10000,
+      panelClass: isError ? 'error-snackbar' : 'success-snackbar'
+    });
   }
 
 }

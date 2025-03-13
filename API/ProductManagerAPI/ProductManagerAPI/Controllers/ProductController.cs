@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using ProductManagerAPI.DbContextConfig;
+using ProductManagerAPI.Dto;
 using ProductManagerAPI.Interfaces;
 using ProductManagerAPI.Models;
 
@@ -19,7 +20,7 @@ namespace ProductManagerAPI.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult<Product>> Create(Product product)
+        public async Task<ActionResult<Product>> Create([FromBody] Product product)
         {
             var createdProduct = await _productRepository.CreateAsync(product);
             return CreatedAtAction(nameof(Create), new { id = createdProduct.Id }, createdProduct);
@@ -27,20 +28,13 @@ namespace ProductManagerAPI.Controllers
 
 
         [HttpGet("getAll")]
-        public async Task<ActionResult<List<Product>>> Get()
+        public async Task<ActionResult<List<ProductDto>>> Get()
         {
             var products = await _productRepository.GetAllAsync();
             return Ok(products);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<Product>> GetProductById(string id)
-        {
-            var product = await _productRepository.GetByIdAsync(id);
-            return product == null ? NotFound() : Ok(product);
-        }
-
-        [HttpGet("productByCategory")]
+        [HttpGet("category/{id}")]
         public async Task<ActionResult<List<Product>>> GetProductByCategory(string id)
         {
             var products = await _productRepository.GetAllAsync();
@@ -48,22 +42,22 @@ namespace ProductManagerAPI.Controllers
             return product == null ? NotFound() : Ok(product);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update(string id, Product product)
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] Product product)
         {
             var updated = await _productRepository.UpdateAsync(id, product);
             return updated ? NoContent() : NotFound();
         }
 
 
-        [HttpPost("delete")]
+        [HttpPut("delete/{id}")]
         public async Task<IActionResult> SoftDelete(string id)
         {
             var deleted = await _productRepository.SoftDeleteAsync(id);
             return deleted ? NoContent() : NotFound();
         }
 
-        [HttpDelete]
+        [HttpDelete("deleteDefinitely/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var deleted = await _productRepository.DeleteAsync(id);
